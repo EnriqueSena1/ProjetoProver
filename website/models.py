@@ -19,8 +19,13 @@ class Produto(models.Model):
     valor = models.IntegerField (null=False, blank=False)
     tipo_choices = [("Perecivel","Perecivel"), ("Congelado","Congelado"), ("Não Pereciveis", "Não Pereciveis")]
     tipo_prod = models.CharField(max_length=16, choices = tipo_choices)
-    descricao = models.TextField()
+    descricao_pro = models.TextField(max_length=350 )
     img_prod = models.models.CharField(max_length=150, null=False, default= False)
-
-
     
+class Carrinho(models.Model):
+
+
+# class ItensCompra(models.Model):
+#     qtdProduto = models.IntegerField(null=False, blank=False)
+#     idProduto = models.ForeignKey(Produto, on_delete=models.CASCADE, null=False, blank=False)
+#     idCompra = models.ForeignKey(Compra, on_delete=models.CASCADE, null=False, blank=False) 
