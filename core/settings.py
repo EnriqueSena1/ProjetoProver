@@ -29,7 +29,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
+AUTH_USER_MODEL = 'website.CustomUser'
 # Application definition
 
 INSTALLED_APPS = [
@@ -83,7 +83,7 @@ pymysql.install_as_MySQLdb()
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'Bancoprover',
+        'NAME': 'bancoprover',
         'USER': 'root',
         'PASSWORD':'',
         'HOST': 'localhost',
