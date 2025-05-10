@@ -83,3 +83,105 @@ class User(APIView):
             return Response({"status": status.HTTP_200_OK})
         else:
             return Response({"status": status.HTTP_404_NOT_FOUND})
+        
+class PrimeiroAcessoSenhaView(APIView):
+    def post(self, request, id):
+        senha = request.data.get('senha')
+        confirmar_senha = request.data.get('confirmarSenha')
+
+        if not senha or not confirmar_senha:
+            return Response({"erro": "Ambas as senhas são obrigatórias."}, status=status.HTTP_400_BAD_REQUEST)
+
+        if senha != confirmar_senha:
+            return Response({"erro": "As senhas não coincidem."}, status=status.HTTP_400_BAD_REQUEST)
+
+        usuario = get_object_or_404(CustomUser, pk=id)
+        usuario.password = make_password(senha)
+        usuario.primeiroAcesso = False
+        usuario.save()
+        logout(request)
+        return Response({"mensagem": "Senha atualizada com sucesso."}, status=status.HTTP_200_OK)
+
+
+class Login(APIView):
+    def post(self, request):
+        nome = request.data.get('nome')
+        senha = request.data.get('senha')
+
+        usuario = authenticate(username=nome, password=senha)
+        
+        if(usuario):
+            login(request, usuario)
+            return Response({"status": status.HTTP_200_OK})
+        else:
+            return Response({"mensagem": "Usuario nao encontrado!", "status": status.HTTP_401_UNAUTHORIZED})
+        
+class Logout(APIView):
+    def post(self, request):
+        logout(request)
+        return Response({"status": status.HTTP_200_OK, "mensagem": "Logout realizado com sucesso"})
+
+class GetDadosUsuarioLogado(APIView):
+    def get(self, request):
+        usuarioId = request.session.get('_auth_user_id')
+        if usuarioId:
+            usuario = CustomUser.objects.filter(id= usuarioId).first()
+            serializer = CustomUserSerializers(usuario)
+            return Response(serializer.data)
+
+        return Response(usuarioId)
+
+
+# 
+# 
+
+class ProdutoViewSet(viewsets.ModelViewSet):
+    queryset = Produto.objects.all()
+    serializer_class = ProdutoSerializer
+
+class CompraViewSet(viewsets.ModelViewSet):
+    queryset = Compra.objects.all()
+    serializer_class = CompraSerializer
+
+class ItensCompraViewSet(viewsets.ModelViewSet):
+    queryset = ItensCompra.objects.all()
+    serializer_class = ItensCompraSerializer
+
+class CadastrarCompraView(APIView):
+    def post(self, request):
+        dadosCompra = request.data.get('compra')
+        itensCompra = request.data.get('itens')
+
+        # Cria a compra
+        compraSerializer = CompraSerializer(data=dadosCompra)
+        if compraSerializer.is_valid():
+            compra = compraSerializer.save()
+        else:
+            return Response(compraSerializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        # Cria os itens de compra
+        for item in itensCompra:
+            item['idCompra'] = compra.id
+            itemSerializer = ItensCompraSerializer(data=item)
+            if itemSerializer.is_valid():
+                itemSerializer.save()
+                print("Item criado com sucesso!")
+            else:
+                print("deu erro")
+                return Response(itemSerializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({"message": "Compra e itens criados com sucesso!", "status": status.HTTP_201_CREATED})
+
+class HistoricoSaldoUsuarioView(APIView):
+    """Retorna as últimas 5 alterações de saldo do usuário logado"""
+    def get(self, request):
+        usuario = request.user
+        serializer = UsuarioComHistoricoSerializer(usuario)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class HistoricoSaldoPorIdView(APIView):
+    """Retorna as últimas 5 alterações de saldo de um usuário pelo ID"""
+    def get(self, request, id):
+        usuario = get_object_or_404(CustomUser, pk=id)
+        serializer = UsuarioComHistoricoSerializer(usuario)
+        return Response(serializer.data, status=status.HTTP_200_OK)

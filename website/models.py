@@ -15,6 +15,7 @@ class Cliente(models.Model):
 
 class Produto(models.Model):
     nome = models.CharField(max_length=50, null=False, blank=False)
+    marca = models.CharField(max_length=50, null=False, default=False)
     qtd_prod = models.IntegerField(null=False, blank=False)
     valor = models.IntegerField (null=False, blank=False)
     tipo_choices = [("Perecivel","Perecivel"), ("Congelado","Congelado"), ("Não Pereciveis", "Não Pereciveis")]
@@ -26,6 +27,14 @@ class Carrinho(models.Model):
     idProduto = models.ForeignKey(Produto, on_delete=models.CASCADE, null=False, blank=False)
     qtd_carrinho = models.IntegerField(null=False, blank=False)
     valor_carrinho = models.IntegerField (null=False, blank=False)
+
+class Compra(models.Model):
+    total = models.IntegerField(null=False, blank=False)
+    pedido_choices = [("Pendente", "Pendente"), ("Concluído","Concluído")]
+    pedido = models.CharField(max_length=10, choices=pedido_choices, default='Pendente')
+    dataCompra = models.DateTimeField(auto_now_add=True)
+    idUsuario = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=False, blank=False)
+    idVendedor = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=False, blank=False)
 
 class ItensCompra(models.Model):
     idCarrinho = models.ForeignKey(Carrinho, on_delete=models.CASCADE, null=False, blank=False)
