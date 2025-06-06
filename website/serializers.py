@@ -21,6 +21,23 @@ class ItensCompraSerializer(serializers.ModelSerializer):
         model = ItensCompra
         fields = '__all__'
 
+class HistoricoSaldo(models.Model):
+    usuario = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='historico_saldo')
+    saldo_anterior = models.IntegerField()
+    saldo_novo = models.IntegerField()
+    diferenca = models.IntegerField()
+    data_alteracao = models.DateTimeField()
+
+    class Meta:
+        ordering = ['-data_alteracao']
+
+    def is_positivo(self):
+        return self.diferenca >= 0
+
+    def __str__(self):
+        sinal = '+' if self.is_positivo() else ''
+        return f"{self.usuario.username}: {sinal}{self.diferenca} em {self.data_alteracao.strftime('%Y-%m-%d %H:%M')}"
+    
 class HistoricoSaldoSerializer(serializers.ModelSerializer):
     class Meta:
         model = HistoricoSaldo

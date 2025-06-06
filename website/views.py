@@ -185,3 +185,8 @@ class HistoricoSaldoPorIdView(APIView):
         usuario = get_object_or_404(CustomUser, pk=id)
         serializer = UsuarioComHistoricoSerializer(usuario)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+# class HistoricoSaldoSerializer(APIView):
+#     def get(self, request, id):
+#         usuario = get_object_or_404(CustomUser, pk=id)
+#         serializer = UsuarioComHistoricoSerializer()
